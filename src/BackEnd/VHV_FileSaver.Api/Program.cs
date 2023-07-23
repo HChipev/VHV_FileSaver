@@ -57,6 +57,8 @@ namespace VHV_FileSaver.Api
                 app.UseSwaggerUI();
             }
 
+            app.UseCors();
+
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
