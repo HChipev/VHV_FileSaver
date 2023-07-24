@@ -5,6 +5,6 @@ namespace VHV_FileSaver.Services.Interfaces
 {
     public interface ITokenService : IService
     {
-        public TokenViewModel GenerateAccessToken(string email, string name, int id, string[] roleNames);
+        public TokenViewModel GenerateAccessToken(string email, string name, int id, string[] roleNames, bool isLogin = false);
     }
 }

@@ -57,6 +57,7 @@
   </section>
 </template>
 <script setup>
+  import jwt_decode from "jwt-decode";
   const email = ref("");
   const password = ref("");
   const message = ref(null);
@@ -82,10 +83,65 @@
         "refresh-token",
         response.headers.get("Refresh-Token")
       );
+
+      setTimeout(() => {
+        localStorage.removeItem("refresh-token");
+      }, jwt_decode(localStorage.getItem("refresh-token")).exp * 1000 - Date.now());
+
+      setTimeout(
+        extendSession,
+        jwt_decode(localStorage.getItem("access-token")).exp * 1000 - Date.now()
+      );
+
       navigateTo("/");
     } else {
       message.value = await response.text();
     }
   }
+
+  const extendSession = async function () {
+    if (
+      localStorage.getItem("access-token") &&
+      localStorage.getItem("refresh-token")
+    ) {
+      if (confirm("Do you want to extend your session?")) {
+        const response = await fetch(
+          "https://localhost:7124/api/Identity/refresh-token",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("access-token")}`,
+            },
+            body: JSON.stringify({
+              token: localStorage.getItem("access-token"),
+              refreshToken: localStorage.getItem("refresh-token"),
+            }),
+          }
+        );
+
+        if (response.ok) {
+          localStorage.setItem(
+            "access-token",
+            response.headers.get("Access-Token")
+          );
+
+          setTimeout(
+            extendSession,
+            jwt_decode(localStorage.getItem("access-token")).exp * 1000 -
+              Date.now()
+          );
+        }
+      } else {
+        localStorage.removeItem("access-token");
+        localStorage.removeItem("refresh-token");
+        navigateTo("/login");
+      }
+    } else {
+      localStorage.removeItem("access-token");
+      localStorage.removeItem("refresh-token");
+      navigateTo("/login");
+    }
+  };
 </script>
 <style></style>

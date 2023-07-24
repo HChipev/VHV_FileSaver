@@ -21,7 +21,7 @@ namespace VHV_FileSaver.Services.Implementation
             _configuration = configuration;
         }
 
-        public TokenViewModel GenerateAccessToken(string email, string name, int id, string[] roleNames)
+        public TokenViewModel GenerateAccessToken(string email, string name, int id, string[] roleNames, bool isLogin = false)
         {
             int.TryParse(_configuration["JWT:TokenValidityInMinutes"], out int tokenValidityInMinutes);
             var expiration = DateTime.UtcNow.AddMinutes(tokenValidityInMinutes);
@@ -56,7 +56,7 @@ namespace VHV_FileSaver.Services.Implementation
                     RefreshTokenExpiryTime = refreshTokenExpiration,
                 });
             }
-            else
+            else if (isLogin)
             {
                 UserRefreshToken.Value = refreshTokenString;
                 UserRefreshToken.RefreshTokenExpiryTime = refreshTokenExpiration;
